@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     listProjectDay.select(id);
     projectInfo.render(id);
-    calendarDay.select(id);
+    calendarDay.select(id, calendarDay.body);
   });
 
   /**
@@ -103,13 +103,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!dateElem) return;
 
     const date = +dateElem.dataset.date;
-    const dateElemInYearCalendar = calendarYear.wrap.querySelector(`[data-date="${dateElem.dataset.date}"]`);
 
     listProjectDay.render(date);
     calendarDay.render(date);
     calendarWeek.selectDay(dateElem);
-    calendarMonth.selectDay(dateElem);
+
+    calendarMonth.render(date);
+    const dateElemInMonthCalendar = calendarMonth.wrap.querySelector(`[data-date="${date}"]`);
+    calendarMonth.selectDay(dateElemInMonthCalendar);
+
+    const dateElemInYearCalendar = calendarYear.wrap.querySelector(`[data-date="${date}"]`);
     calendarYear.selectDay(dateElemInYearCalendar);
+
     projectInfo.clear();
   });
 
@@ -126,14 +131,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!dateElem) return;
 
     const date = +dateElem.dataset.date;
-    const dateElemInYearCalendar = calendarYear.wrap.querySelector(`[data-date="${dateElem.dataset.date}"]`);
 
     listProjectDay.render(date);
     calendarDay.render(date);
-    calendarWeek.setDate(date);
+
     calendarWeek.render(date);
+    const dateElemInWeekCalendar = calendarWeek.wrap.querySelector(`[data-date="${date}"]`);
+    calendarWeek.selectDay(dateElemInWeekCalendar);
+
     calendarMonth.selectDay(dateElem);
+
+    const dateElemInYearCalendar = calendarYear.wrap.querySelector(`[data-date="${date}"]`);
     calendarYear.selectDay(dateElemInYearCalendar);
+
+    projectInfo.clear();
+  });
+
+  /**
+   * Биндим события на листание месячного календаря
+   * перерендеривается календарь
+   * очищается список проектов
+   * очищается блок информации о проекте
+   */
+  calendarMonth.btnPrev.addEventListener('click', () => {
+    calendarMonth.goPrevMonth();
+    listProjectDay.clear();
+    projectInfo.clear();
+  });
+  calendarMonth.btnNext.addEventListener('click', () => {
+    calendarMonth.goNextMonth();
+    listProjectDay.clear();
     projectInfo.clear();
   });
 
@@ -142,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    * перерендериваем список проектов с проектами на выбранную дату
    * перерендериваем дневной календарь
    * перерендериваем недельный календарь
+   * перерендериваем месячный календарь
    * отмечаем число выделенным на недельном, месячном и годовом календарях
    * очищаем информацию о проекте
    */
@@ -150,13 +178,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!dateElem) return;
 
     const date = +dateElem.dataset.date;
-    const dateElemInMonthCalendar = calendarMonth.wrap.querySelector(`[data-date="${dateElem.dataset.date}"]`);
 
     listProjectDay.render(date);
     calendarDay.render(date);
-    calendarWeek.setDate(date);
+
     calendarWeek.render(date);
+    const dateElemInWeekCalendar = calendarWeek.wrap.querySelector(`[data-date="${date}"]`);
+    calendarWeek.selectDay(dateElemInWeekCalendar);
+
+    calendarMonth.render(date);
+    const dateElemInMonthCalendar = calendarMonth.wrap.querySelector(`[data-date="${date}"]`);
     calendarMonth.selectDay(dateElemInMonthCalendar);
+
     calendarYear.selectDay(dateElem);
     projectInfo.clear();
   });
@@ -176,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     projectInfo.render(id);
     listProjectDay.select(id);
-    calendarDay.select(id);
+    calendarDay.select(id, calendarDay.body);
   });
 
   /**
@@ -206,6 +239,10 @@ class ListProjectsDay {
   select(id) {
     [...this.body.children].forEach(elem => elem.classList.remove('active'));
     this.body.querySelector(`[data-project-id="${id}"]`).classList.add('active');
+  }
+
+  clear() {
+    this.body.innerHTML = null;
   }
 
   _generateList(date = new Date().getTime()) {
@@ -314,9 +351,9 @@ class Calendar {
     this.wrap = document.querySelector(data.wrapSelector);
   }
 
-  select(id) {
-    [...this.body.querySelectorAll('[data-project-id]')].forEach(elem => elem.classList.remove('selected'));
-    this.body.querySelector(`[data-project-id="${id}"]`).classList.add('selected');
+  select(id, body) {
+    [...body.querySelectorAll('[data-project-id]')].forEach(elem => elem.classList.remove('selected'));
+    body.querySelector(`[data-project-id="${id}"]`).classList.add('selected');
   }
 
   checkingWhetherProjectsOnDate(date, zeroTime = true) {
@@ -680,10 +717,10 @@ class CalendarMonth extends Calendar {
     this.currentMonth = new Date().getMonth();
 
     this.render();
-    this._bind();
   }
 
-  render() {
+  render(date) {
+    if (date) this.currentMonth = new Date(date).getMonth();
     this.monthNameBlock.textContent = this.monthName[this.infoByMonth[this.currentMonth].firstDay.getMonth()];
     this.body.innerHTML = this._generateMonthCalendar();
   }
@@ -696,11 +733,6 @@ class CalendarMonth extends Calendar {
   goNextMonth() {
     this.currentMonth = this.currentMonth === 11 ? 11 : this.currentMonth + 1;
     this.render();
-  }
-
-  _bind() {
-    this.btnPrev.addEventListener('click', () => this.goPrevMonth());
-    this.btnNext.addEventListener('click', () => this.goNextMonth());
   }
 
   _generateMonthCalendar() {
@@ -739,8 +771,8 @@ class CalendarMonth extends Calendar {
       projectToday !== -1
         ? templateDays += `<div class="calendar__cell task" data-date="${date.getTime()}">${i}</div>`
         : date.format('dd-mm-yyyy') === new Date().format('dd-mm-yyyy')
-          ? templateDays += `<div class="calendar__cell current" data-date="${date.getTime()}">${i}</div>`
-          : templateDays += `<div class="calendar__cell" data-date="${date.getTime()}">${i}</div>`;
+        ? templateDays += `<div class="calendar__cell current" data-date="${date.getTime()}">${i}</div>`
+        : templateDays += `<div class="calendar__cell" data-date="${date.getTime()}">${i}</div>`;
     }
 
     return templateDays;
@@ -809,8 +841,8 @@ class CalendarYear extends Calendar {
       projectToday !== -1
         ? templateDays += `<div class="calendar-page__year__month-block__table__day red-label" data-date="${date}">${i}</div>`
         : new Date(date).format('dd-mm-yyyy') === new Date().format('dd-mm-yyyy')
-          ? templateDays += `<div class="calendar-page__year__month-block__table__day current" data-date="${date}">${i}</div>`
-          : templateDays += `<div class="calendar-page__year__month-block__table__day" data-date="${date}">${i}</div>`;
+        ? templateDays += `<div class="calendar-page__year__month-block__table__day current" data-date="${date}">${i}</div>`
+        : templateDays += `<div class="calendar-page__year__month-block__table__day" data-date="${date}">${i}</div>`;
     }
 
     return templateDays;
