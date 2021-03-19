@@ -3,5 +3,5 @@
 
 1. **ProjectCalendar** - `Чистый JS` 
 2. **GuestList** - `Чистый JS` 
-2. **Select** - `React` `TypeScript`
-2. **Web3** - `React` `TypeScript`
+3. **Select** - `React` `TypeScript`
+4. **Web3** - `React` `TypeScript`
