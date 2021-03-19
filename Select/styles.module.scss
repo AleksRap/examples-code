@@ -1,0 +1,163 @@
+@import '../../assets/styles/mixins';
+@import '../../assets/styles/variables';
+
+@mixin disabled {
+  pointer-events: none;
+  opacity: .6;
+}
+
+.label {
+  display: inline-block;
+  margin-right: 12px;
+
+  &.disabled {
+    @include disabled;
+  }
+
+  &.small {
+    margin-top: 10px;
+  }
+
+  &.normal {
+    margin-top: 13px;
+  }
+
+  &.big {
+    margin-top: 20px;
+  }
+}
+
+.errorText {
+  margin-top: 5px;
+}
+
+.selectWrap {
+  @include flexbox(flex-start, flex-start);
+}
+
+.selectWithErrorWrap {
+  flex: 1 0 auto;
+}
+
+.select {
+
+  &.disabled {
+    @include disabled;
+  }
+}
+
+:root {
+  .control {
+    border: 1px solid $color-basic-200;
+    border-radius: 10px;
+
+    &:hover {
+      border: 1px solid $color-basic-700;
+    }
+
+    &.errorControl {
+      border-color: $color-error;
+    }
+  }
+
+  .valueContainer {
+    padding: 0;
+    margin-right: 10px;
+  }
+}
+
+.control {
+  height: 50px;
+
+  border-radius: 10px;
+  font-weight: 600;
+
+  &.focused {
+    border: 1px solid $color-basic-200;
+    box-shadow: none;
+  }
+
+  &.small {
+    height: 34px;
+    padding: 10px 16px;
+
+    font-size: 12px;
+  }
+
+  &.normal {
+    height: 44px;
+    padding: 10px 20px;
+  }
+
+  &.big {
+    height: 58px;
+    padding: 12px 20px;
+  }
+
+  &.dark {
+    background-color: $color-basic-300;
+  }
+
+  &.light {
+    background-color: $color-basic-100;
+  }
+}
+
+.placeholder {
+  display: block;
+  width: 90%;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu {
+  margin-top: 0;
+  margin-bottom: 0;
+
+  border-radius: 0;
+  box-shadow: none;
+
+  z-index: 5;
+}
+
+.option {
+
+  &:hover {
+    background-color: $color-basic-300;
+    color: white;
+  }
+
+  &.selected {
+    background-color: $color-basic-300;
+  }
+
+  &.focused {
+    background-color: $color-basic-300;
+  }
+}
+
+.indicatorsContainer {
+  @include flexbox();
+  width: 14px;
+}
+
+.dropdownIndicator {
+  width: 15px;
+  height: 8px;
+
+  font-size: 8px;
+
+  transform: rotate(0deg);
+  transition: all $transition-time ease-in;
+
+  &.open {
+    transform: rotate(180deg);
+    transition: all $transition-time ease-in;
+  }
+}
+
+.noOptionsMessage {
+  padding: 10px 5px;
+}
